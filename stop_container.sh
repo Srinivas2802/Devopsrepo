@@ -1,13 +1,20 @@
 #!/bin/bash
 
-# Check if any container is running that matches your container name or ID filter
+# Log start
+echo "Script started."
+
+# Get the container ID of the running Docker container
 container_id=$(docker ps -q --filter "name=your-container-name")
 
-# If no container is running, output a message and exit without error
-if [ -z "$container_id" ]; then
-    echo "No running container found to stop."
-    exit 0
-else
+# Log the container ID found (or not found)
+echo "Container ID found: $container_id"
+
+# Check if the container ID is not empty
+if [ -n "$container_id" ]; then
     echo "Stopping container with ID: $container_id"
     docker stop $container_id
+else
+    echo "No running container found to stop."
 fi
+
+echo "Script ended."
