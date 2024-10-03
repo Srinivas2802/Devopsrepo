@@ -1,20 +1,29 @@
 #!/bin/bash
+set -e  # Exit immediately if a command exits with a non-zero status
 
-# Log start
-echo "Script started."
-
-# Get the container ID of the running Docker container
-container_id=$(docker ps -q --filter "name=your-container-name")
-
-# Log the container ID found (or not found)
-echo "Container ID found: $container_id"
-
-# Check if the container ID is not empty
-if [ -n "$container_id" ]; then
-    echo "Stopping container with ID: $container_id"
-    docker stop $container_id
+# Check if the script is being run as root
+if [ "$EUID" -ne 0 ]; then 
+  echo "Please run as root"
+  exit 1
 else
-    echo "No running container found to stop."
+  echo "Running as root user"
 fi
 
-echo "Script ended."
+# Get the container ID of the running container (assuming the container is using the image srinivasv2802/codedeploy)
+CONTAINER_ID=$(docker ps -q --filter ancestor=srinivasv2802/codedeploy:latest)
+
+# Check if any containers are running for the image
+if [ -z "$CONTAINER_ID" ]; then
+  echo "No running containers found for the image srinivasv2802/codedeploy:latest."
+else
+  echo "Stopping container with ID: $CONTAINER_ID"
+  docker stop "$CONTAINER_ID"
+  
+  # Verify if the container stopped successfully
+  if [ $? -eq 0 ]; then
+    echo "Container stopped successfully."
+  else
+    echo "Failed to stop the container."
+    exit 1
+  fi
+fi
